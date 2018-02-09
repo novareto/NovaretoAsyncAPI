@@ -9,6 +9,11 @@ from loader import Configuration
 from collections import namedtuple
 
 
+CACHE = {
+    "A": 42,
+}
+
+
 def get_key(path):
     if not os.path.isfile(path):
         with open(path, 'w+', encoding="utf-8") as keyfile:
@@ -31,12 +36,11 @@ with Configuration('config.json') as config:
     from nv_async import endpoints
     from cromlech.jwt.components import JWTHandler, JWTService
 
-    app = Sanic(__name__)
+    key = get_key(config['crypto']['keypath'])
     
-    @app.listener('before_server_start')
-    def prepare_crypto(app, loop):
-        key = get_key(config['crypto']['keypath'])
-        app.jwt_service = JWTService(key, JWTHandler, lifetime=600)
+    app = Sanic(__name__)
+    app.jwt_service = JWTService(key, JWTHandler, lifetime=600)
+    app.cache = CACHE
 
     for path, action in endpoints.items():
         app.add_route(action, path)
