@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from sanic import response
-from ..api import Action
+from .api import Action
 
 
 class Dummy(Action):
