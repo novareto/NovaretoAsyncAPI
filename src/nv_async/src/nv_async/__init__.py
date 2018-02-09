@@ -2,7 +2,7 @@
 
 import logging
 from zope.i18nmessageid import MessageFactory
-from .actions import Dummy
+from .actions import Recherche
 
 
 i18n = MessageFactory("novareto_async")
@@ -14,5 +14,5 @@ def log(message, summary='', severity=logging.DEBUG):
 
 
 endpoints = {
-    '/dummy': Dummy.as_view(),
+    '/recherche': Recherche.as_view(),
 }

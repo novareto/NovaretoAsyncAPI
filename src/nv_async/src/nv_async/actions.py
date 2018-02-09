@@ -2,11 +2,10 @@
 
 from asyncio import sleep, Future
 from sanic import response
-from .api import Action
+from zeep import Client
+from zeep.asyncio import AsyncTransport
 
-### TESTING PURPOSE ONLY
-from random import randint
-###
+from .api import Action
 
 
 requested_keys = {
@@ -14,29 +13,37 @@ requested_keys = {
 }
 
 
-async def long_API_call(request, key):
+async def soap_request(request, key):
+    year, mnr, c_number = key
     future = requested_keys.get(key)
     if future is None:
         future = requested_keys[key] = Future()
-        print('long call for ')
-        await sleep(15)
-        future.set_result(randint(1, 41))
+        transport = AsyncTransport(request.app.loop, cache=None)
+        client = Client(request.app.config.soap_service, transport=transport)
+        result = await client.service.getLNRecherche(c_number, mnr, year)
+        future.set_result(result)
     return future
 
 
-class Dummy(Action):
+class Recherche(Action):
 
     async def get(self, request):
-        key = request.raw_args.get('key', None)
-        if key is None:
-            return response.raw(b'Gimme key !', status=400)
 
+        key = []
+        for arg in ('year', 'mnr', 'c_number'):
+            param = request.raw_args.get(arg, None)
+            if param is None:
+                return response.text(
+                    'Missing {0}'.format(arg), status=400)
+            key.append(arg)
+
+        key = tuple(key)
         cache = request.app.cache
         if key in cache:
             result = cache.get(key)
         else:
-            future = await long_API_call(request, key)
+            future = await soap_request(request, key)
             result = cache[key] = await future
-            
+
         return response.json(
             {'result': result}, status=200)

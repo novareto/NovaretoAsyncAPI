@@ -39,6 +39,7 @@ with Configuration('config.json') as config:
     key = get_key(config['crypto']['keypath'])
     
     app = Sanic(__name__)
+    app.config.soap_service = config['soap']['url']
     app.jwt_service = JWTService(key, JWTHandler, lifetime=600)
     app.cache = CACHE
 

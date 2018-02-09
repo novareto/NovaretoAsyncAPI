@@ -23,8 +23,10 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        "sanic",
         "dolmen.api_engine",
+        "sanic",
+        "zeep",
+        "zeep[async]",
         "zope.i18nmessageid",
     ],
 )
