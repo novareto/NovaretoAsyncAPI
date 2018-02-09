@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from asyncio import sleep
+from asyncio import sleep, Future
 from sanic import response
 from .api import Action
-from concurrent.futures import Future
 
 ### TESTING PURPOSE ONLY
 from random import randint
@@ -37,7 +36,7 @@ class Dummy(Action):
             result = cache.get(key)
         else:
             future = await long_API_call(request, key)
-            result = cache[key] = future.result()
+            result = cache[key] = await future
             
         return response.json(
             {'result': result}, status=200)
